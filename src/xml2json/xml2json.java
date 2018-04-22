@@ -8,6 +8,9 @@ import java.util.List;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class xml2json {
 	public decide decider;
@@ -17,12 +20,12 @@ public class xml2json {
 		return s;
 	}
 
-	public xml2json(String path) {
+	public xml2json(String path,boolean clear) {
 		this.path = path;
-		decider = new decide();
+		decider = new decide(clear);
 	}
 
-	public String getJson() {
+	public String getJson() throws Exception {
 		return decider.getString(path);
 	}
 }
@@ -41,8 +44,10 @@ class decide {
 	public boolean isFirstConnect = true;
 	public ArrayList<Integer> array;
 	public String ForTimes;
-
-	public decide() {
+	public boolean Clear ;
+	
+	public decide(boolean clear) {
+		Clear = clear;
 		x = 0;
 		y = 0;
 		id = 0;
@@ -51,7 +56,7 @@ class decide {
 		array = new ArrayList<Integer>();
 	};
 
-	public String getString(String path) {
+	public String getString(String path) throws Exception {
 		// 通过将文件中的xml标签读取进来，并在迭代器中遍历每个元素
 		SAXReader reader = new SAXReader();
 		try {
@@ -73,6 +78,20 @@ class decide {
 		cell.deleteCharAt(cell.lastIndexOf(","));
 		cell.insert(0, head);
 		cell.append(trail);
+		
+		if(Clear) {
+			JSONObject js;
+			JSONObject json = new JSONObject(cell.toString());
+			JSONArray arr = json.getJSONArray("cells");
+			for (int i = 0; i < arr.length(); i++) {
+				js = (JSONObject) arr.get(i);
+				if (js.has("parent") && js.get("parent").equals("")) {
+					js.put("parent", (Object) null);
+				}
+			}
+			String sss = String.valueOf(json);
+			return sss;
+		}
 		
 		return cell.toString();
 	}
@@ -183,7 +202,15 @@ class decide {
 		case "CREATE":
 			switch (temp[1].toUpperCase()) {
 			case "TABLE":
-
+				sValue = sValue.replaceFirst("\\(", " (");
+				System.out.println(sValue);
+				sValue = sValue.replaceAll("\\s{2,}", " ");
+				System.out.println(sValue);
+				String [] b = sValue.split("(?<!\\(.{0,100})\\s");
+				cell.append(producer.produce("sCreateTable", level).set("owner_id", (id++) + (1000 * level))
+						.set("position_x", x += 80).set("position_y", y += 80).set("attrs_TABLENAME", temp[2])
+						.set("COLUMNS", b[3]).set("attrs_type", TYPE).set("attrs_SETCONNECT", Connect)
+						.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 				break;
 			case "USER":
 				cell.append(producer.produce("sCreateUser", level).set("owner_id", (id++) + (1000 * level))
@@ -192,15 +219,32 @@ class decide {
 						.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 				break;
 			case "VIEW":
-
+				cell.append(producer.produce("sCreateView", level).set("owner_id", (id++) + (1000 * level))
+						.set("position_x", x += 80).set("position_y", y += 80).set("attrs_VIEWNAME", temp[2])
+						.set("attrs_CONTENTS", temp[5]).set("attrs_type", TYPE).set("attrs_SETCONNECT", Connect)
+						.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 				break;
 			default:
 				// 留着以后解决
 				System.err.println("cant recognize " + sValue);
+				break;
 			}
 		case "SELECT":
+			
+			
 		case "DROP":
-		case "ALTER":
+			
+			
+		case "ALTER": //修改密码  ALTER userName IDENTIFIED BY username 
+			cell.append(producer.produce("sAlterPwd", level).set("owner_id", (id++) + (1000 * level))
+					.set("position_x", x += 80).set("position_y", y += 80).set("attrs_USER", temp[1])
+					.set("attrs_PWD", temp[4]).set("attrs_type", TYPE)
+					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
+			break;
+		default:
+			// 留着以后解决
+			System.err.println("cant recognize " + sValue);
+			break;
 		}
 	}
 
@@ -290,6 +334,10 @@ class decide {
 		return embeds_sons.toString();
 	}
 
+	
+	
+	
+	
 }
 
 class Producer implements StaticString {

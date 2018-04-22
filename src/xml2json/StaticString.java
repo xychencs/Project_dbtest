@@ -73,7 +73,7 @@ public interface StaticString {
 			"	}";
 	
 	public final static String sCreateTable = "{\r\n" + 
-			"	\"type\": \"basic.UserLogin\",\r\n" + 
+			"	\"type\": \"basic.CreateTable\",\r\n" + 
 			"	\"position\": {\r\n" + 
 			"		\"x\": position_x,\r\n" + 
 			"		\"y\": position_y\r\n" + 
@@ -86,25 +86,19 @@ public interface StaticString {
 			"	\"id\": \"owner_id\",\r\n" + 
 			"	\"closed\": closed_id,\r\n" + 
 			"	\"parent\":\"parent_id\",\r\n" + 
-			"	\"z\": 4,\r\n" + 
+			"	\"z\": 0,\r\n" + 
 			"	\"attrs\": {\r\n" + 
-			"		\"image\": {\r\n" + 
-			"			imageSize\r\n" + 
+			"		\"TABLENAME\": {\r\n" + 
+			"			\"text\": \"attrs_TABLENAME\"\r\n" + 
 			"		},\r\n" + 
-			"		\"UID\": {\r\n" + 
-			"			\"text\": \"attrs_UID\"\r\n" + 
+			"		\"COLUMNS\": {\r\n" + 
+			"			\"text\": \"attrs_COLUMNS\"\r\n" + 
 			"		},\r\n" + 
-			"		\"PWD\": {\r\n" + 
-			"			\"text\": \"attrs_PWD\"\r\n" + 
-			"		},\r\n" + 
-			"		\"CONNECT\": {\r\n" + 
-			"			\"text\": \"attrs_CONNECT\"\r\n" + 
+			"		\"SETCONNECT\": {\r\n" + 
+			"			\"text\": \"attrs_SETCONNECT\"\r\n" + 
 			"		},\r\n" + 
 			"		\"TYPE\": {\r\n" + 
 			"			\"text\": \"attrs_TYPE\"\r\n" + 
-			"		},\r\n" + 
-			"		\"rect\": {\r\n" + 
-			"			\"magnet\": \"\"\r\n" + 
 			"		}\r\n" + 
 			"	}\r\n" + 
 			"}";
@@ -347,7 +341,32 @@ public interface StaticString {
 	
 	
 	
-	public final static String sAlterPwd ="";
+	public final static String sAlterPwd ="{\r\n" + 
+			"		\"type\": \"basic.AlterPwd\",\r\n" + 
+			"		\"position\": {\r\n" + 
+			"			\"x\": position_x,\r\n" + 
+			"			\"y\": position_y\r\n" + 
+			"		},\r\n" + 
+			"		\"size\": {\r\n" + 
+			"			\"width\": 60,\r\n" + 
+			"			\"height\": 60\r\n" + 
+			"		},\r\n" + 
+			"		\"angle\": 0,\r\n" + 
+			"		\"id\": \"owner_id\",\r\n" + 
+			"		\"closed\": closed_id,\r\n" + 
+			"		\"z\": 1,\r\n" + 
+			"		\"attrs\": {\r\n" + 
+			"			\"USER\": {\r\n" + 
+			"				\"text\": \"attrs_USER\"\r\n" + 
+			"			},\r\n" + 
+			"			\"PWD\": {\r\n" + 
+			"				\"text\": \"attrs_PWD\"\r\n" + 
+			"			},\r\n" + 
+			"			\"TYPE\": {\r\n" + 
+			"				\"text\": \"attrs_TYPE\"\r\n" + 
+			"			}\r\n" + 
+			"		}\r\n" + 
+			"	}";
 	public final static String sSetVal ="{\r\n" + 
 			"		\"type\": \"basic.SetVal\",\r\n" + 
 			"		\"position\": {\r\n" + 
@@ -434,7 +453,6 @@ public interface StaticString {
 	public final static String sRunRemote ="";
 	public final static String sInteract ="";
 	public final static String sRunImport ="";
-	public final static String sClear ="";
 	public final static String sGeneral ="";
 	
 }

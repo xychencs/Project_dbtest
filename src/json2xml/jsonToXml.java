@@ -213,7 +213,7 @@ public class jsonToXml {
 			// 获取数据库连接
 			Connection conn = DriverManager.getConnection(url, "root", "123456");
 			// sql语句
-			String sql = "select * from table_visualcase where title = '0.3.1.1.1.1.1.6.'";
+			String sql = "select * from table_visualcase where title = '0.3.1.1.1.1.1.4.'";
 			String result;
 			String decode;
 			// 创建PreparedStatement对象
@@ -533,7 +533,7 @@ public class jsonToXml {
 			JSONObject COLUMN = attrs.getJSONObject("COLUMN");
 
 			funname = COLUMN.getString("text");
-			Element RESULT_ = root.addElement("RESULT");
+			Element RESULT_ = SQL_CASE.addElement("RESULT");
 
 			// 添加对应查询结果
 			add_column(RESULT_, funname);
