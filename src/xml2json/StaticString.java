@@ -169,7 +169,7 @@ public interface StaticString {
 			"			\"text\": \"attrs_SETCONNECT\"\r\n" + 
 			"		},\r\n" + 
 			"		\"TYPE\": {\r\n" + 
-			"			\"text\": \"attrs_type\"\r\n" + 
+			"			\"text\": \"attrs_TYPE\"\r\n" + 
 			"		},\r\n" + 
 			"		\"rect\": {\r\n" + 
 			"			\"magnet\": \"\"\r\n" + 
@@ -268,7 +268,7 @@ public interface StaticString {
 			"			\"text\": \"attrs_WHERE\"\r\n" + 
 			"		},\r\n" + 
 			"		\"TYPE\": {\r\n" + 
-			"			\"text\": \"attrs_type\"\r\n" + 
+			"			\"text\": \"attrs_TYPE\"\r\n" + 
 			"		}\r\n" + 
 			"	}\r\n" + 
 			"}";
@@ -302,7 +302,7 @@ public interface StaticString {
 			"			\"text\": \"attrs_WHERE\"\r\n" + 
 			"		},\r\n" + 
 			"		\"TYPE\": {\r\n" + 
-			"			\"text\": \"attrs_type\"\r\n" + 
+			"			\"text\": \"attrs_TYPE\"\r\n" + 
 			"		}\r\n" + 
 			"	}\r\n" + 
 			"}";
@@ -323,14 +323,14 @@ public interface StaticString {
 			"	\"parent\":\"parent_id\",\r\n" + 
 			"	\"z\": 1,\r\n" + 
 			"	\"attrs\": {\r\n" + 
-			"		\"SETCONNECT\": {\r\n" + 
-			"			\"text\": \"attrs_SETCONNECT\"\r\n" + 
-			"		},\r\n" + 
 			"		\"SQL\": {\r\n" + 
 			"			\"text\": \"attrs_SQL\"\r\n" + 
 			"		},\r\n" + 
 			"		\"TYPE\": {\r\n" + 
 			"			\"text\": \"attrs_TYPE\"\r\n" + 
+			"		},\r\n" + 
+			"		\"COLUMN\": {\r\n" + 
+			"			\"text\": \"attrs_COLUMN\"\r\n" + 
 			"		}\r\n" + 
 			"	}\r\n" + 
 			"}";

@@ -703,10 +703,10 @@ public class jsonToXml {
 				String operation = OPERATION.getString("text");
 				Element SQL = SQL_CASE.addElement("SQL");
 				if (!table.equals("")) {
-					String str = "GRANT " + operation + " " + table + " to " + user + ";";
+					String str = "GRANT " + operation + " on " + table + " to " + user + ";";
 					SQL.setText(getText(str));
 				} else if (!view.equals("")) {
-					String str = "GRANT " + operation + " " + view + " to " + user + ";";
+					String str = "GRANT " + operation + " on " + view + " to " + user + ";";
 				}
 			}
 		}

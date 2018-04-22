@@ -9,5 +9,6 @@ public class test {
 		String path = "C:\\Users\\Dell\\Desktop\\tes3.xml";
 		xml2json a = new xml2json(path,true);
 		String x = a.getJson().toString();
+		System.out.println(x);
 	}
 }

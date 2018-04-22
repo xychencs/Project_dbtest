@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.dom4j.dom.DOMNodeHelper.EmptyNodeList;
 import org.dom4j.io.SAXReader;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +46,7 @@ class decide {
 	public ArrayList<Integer> array;
 	public String ForTimes;
 	public boolean Clear ;
+	public Element ele;
 	
 	public decide(boolean clear) {
 		Clear = clear;
@@ -120,12 +122,14 @@ class decide {
 		}
 		// 根据当前节点的标签进行匹配
 		SearchNode(node, level);
-
 		List<Element> listElement = node.elements();// 所有当前节点的list
 		if (listElement.isEmpty()) {
 		} else {
 			for (Element e : listElement) {// 遍历该节点的子节点
 				// 如果是由SQL_CASE包裹着的节点，层次不升高
+				if (e.getName().equals("RESULT")) {
+					return;
+				}
 				if (e.getParent().getName().toUpperCase().equals("SQL_CASE")) {
 					getNodes(e, level);// 递归
 				} else {
@@ -157,6 +161,7 @@ class decide {
 			hasAdd = true;
 			break;
 		case "SQL":
+			ele = attr;
 			analyseSQL(sValue, level);
 			hasAdd = true;
 			break;
@@ -209,19 +214,19 @@ class decide {
 				String [] b = sValue.split("(?<!\\(.{0,100})\\s");
 				cell.append(producer.produce("sCreateTable", level).set("owner_id", (id++) + (1000 * level))
 						.set("position_x", x += 80).set("position_y", y += 80).set("attrs_TABLENAME", temp[2])
-						.set("COLUMNS", b[3]).set("attrs_type", TYPE).set("attrs_SETCONNECT", Connect)
+						.set("COLUMNS", b[3]).set("attrs_TYPE", TYPE).set("attrs_SETCONNECT", Connect)
 						.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 				break;
 			case "USER":
 				cell.append(producer.produce("sCreateUser", level).set("owner_id", (id++) + (1000 * level))
 						.set("position_x", x += 80).set("position_y", y += 80).set("attrs_NEWUID", temp[2])
-						.set("attrs_NEWPWD", temp[5]).set("attrs_type", TYPE).set("attrs_SETCONNECT", Connect)
+						.set("attrs_NEWPWD", temp[5]).set("attrs_TYPE", TYPE).set("attrs_SETCONNECT", Connect)
 						.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 				break;
 			case "VIEW":
 				cell.append(producer.produce("sCreateView", level).set("owner_id", (id++) + (1000 * level))
 						.set("position_x", x += 80).set("position_y", y += 80).set("attrs_VIEWNAME", temp[2])
-						.set("attrs_CONTENTS", temp[5]).set("attrs_type", TYPE).set("attrs_SETCONNECT", Connect)
+						.set("attrs_CONTENTS", temp[5]).set("attrs_TYPE", TYPE).set("attrs_SETCONNECT", Connect)
 						.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 				break;
 			default:
@@ -229,21 +234,63 @@ class decide {
 				System.err.println("cant recognize " + sValue);
 				break;
 			}
+			break;
 		case "SELECT":
+			StringBuilder result = new StringBuilder();
+			List<Element> listElement_RECORD = ele.getParent().element("RESULT").elements();
+			for (Element e : listElement_RECORD) {
+				List<Element> listElement_Column = e.elements();
+				for (Element eColumn : listElement_Column) {
+					result.append(eColumn.getText());
+					result.append(",,");
+				}
+				result.append(";;");
+			}
+			
+			cell.append(producer.produce("sSelect", level).set("owner_id", (id++) + (1000 * level))
+					.set("position_x", x += 80).set("position_y", y += 80)
+					.set("attrs_COLUMN", result)
+					.set("attrs_SQL",sValue)
+					.set("attrs_TYPE", TYPE)
+					.set("parent_id", "parent_id" + (1000 * level + (id - 1)))
+					.getString());
 			
 			
+			System.out.println(ele.getParent().element("RESULT").element("RECORD").element("COLUMN").getText());
+			break;
 		case "DROP":
 			
-			
+			break;
 		case "ALTER": //修改密码  ALTER userName IDENTIFIED BY username 
 			cell.append(producer.produce("sAlterPwd", level).set("owner_id", (id++) + (1000 * level))
 					.set("position_x", x += 80).set("position_y", y += 80).set("attrs_USER", temp[1])
-					.set("attrs_PWD", temp[4]).set("attrs_type", TYPE)
+					.set("attrs_PWD", temp[4]).set("attrs_TYPE", TYPE)
 					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
+			break;
+			
+		case "INSERT":
+			String[] b= sValue.split("(?<=\\w|\\))(\\s)(?=\\(|\\w)");
+//			System.out.println(b[i]);
+			String table_name;
+			if(b.length == 5) {
+				table_name = b[2];
+			}else {
+				table_name = b[2] + b[3];
+			}
+			cell.append(producer.produce("sInsert", level).set("owner_id", (id++) + (1000 * level))
+					.set("position_x", x += 80).set("position_y", y += 80)
+					.set("attrs_INSERTTARGET",table_name).set("attrs_VALUES", b[b.length-1])
+					.set("attrs_TYPE", TYPE)
+					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
+			
+			break;
+			
+		case "GRANT":
+			
 			break;
 		default:
 			// 留着以后解决
-			System.err.println("cant recognize " + sValue);
+			System.err.println("SQL cant be recognized :" + sValue);
 			break;
 		}
 	}
@@ -418,6 +465,10 @@ class Producer implements StaticString {
 		return set(prev, String.valueOf(rep));
 	}
 
+	public Producer set(String prev, StringBuilder rep) {
+		return set(prev, String.valueOf(rep));
+	}
+	
 	public Producer set(String prev, String rep) {
 		int a = stringBuilder.indexOf(prev);
 		if (a < 0) {
