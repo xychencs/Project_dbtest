@@ -127,8 +127,13 @@ class decide {
 		} else {
 			for (Element e : listElement) {// 遍历该节点的子节点
 				// 如果是由SQL_CASE包裹着的节点，层次不升高
-				if (e.getName().equals("RESULT")) {
-					return;
+				String name = e.getName().toUpperCase();
+				if (name.equals("RESULT")) {
+					continue;
+				}
+				if (name.equals("SETVAL") || name.equals("GETVAL")) {
+					SearchNode(e, level+1);
+					continue;
 				}
 				if (e.getParent().getName().toUpperCase().equals("SQL_CASE")) {
 					getNodes(e, level);// 递归
@@ -163,7 +168,6 @@ class decide {
 		case "SQL":
 			ele = attr;
 			analyseSQL(sValue, level);
-			hasAdd = true;
 			break;
 		case "SQL_CASE":
 			break;
@@ -179,6 +183,23 @@ class decide {
 					.set("attrs_FORTIMES", "attrs_FORTIMES" + (1000 * (level) + (id - 1)))
 					.set("parent_id", "parent_id" + (1000 * level + (id - 1)))
 					.set("embeds_id", "embeds_id" + (1000 * level + (id - 1))).getString());
+			hasAdd = true;
+			break;
+		case "SETVAL":
+			cell.append(producer.produce("sSetVal", level).set("owner_id", (id++) + (1000 * (level)))
+					.set("position_x", x += 80).set("position_y", y += 80)
+					.set("attrs_VALNAME", attr.element("VALNAME").getText())
+					.set("attrs_VAL", attr.element("VAL").getText())
+					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
+			hasAdd = true;
+			break;
+			
+		case "GETVAL":
+			cell.append(producer.produce("sGetVal", level).set("owner_id", (id++) + (1000 * (level)))
+					.set("position_x", x += 80).set("position_y", y += 80)
+					.set("attrs_VALNAME", attr.element("VALNAME").getText())
+					.set("attrs_VAL", attr.element("VAL").getText())
+					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 			hasAdd = true;
 			break;
 		default:
@@ -203,6 +224,8 @@ class decide {
 	 */
 	public void analyseSQL(String sValue, int level) {
 		String[] temp = sValue.trim().split(" ");
+		String[] b;
+		boolean hasAdd = true;
 		switch (temp[0].toUpperCase()) {
 		case "CREATE":
 			switch (temp[1].toUpperCase()) {
@@ -211,7 +234,7 @@ class decide {
 				System.out.println(sValue);
 				sValue = sValue.replaceAll("\\s{2,}", " ");
 				System.out.println(sValue);
-				String [] b = sValue.split("(?<!\\(.{0,100})\\s");
+				b = sValue.split("(?<!\\(.{0,100})\\s");
 				cell.append(producer.produce("sCreateTable", level).set("owner_id", (id++) + (1000 * level))
 						.set("position_x", x += 80).set("position_y", y += 80).set("attrs_TABLENAME", temp[2])
 						.set("COLUMNS", b[3]).set("attrs_TYPE", TYPE).set("attrs_SETCONNECT", Connect)
@@ -231,20 +254,26 @@ class decide {
 				break;
 			default:
 				// 留着以后解决
+				hasAdd = false;
 				System.err.println("cant recognize " + sValue);
 				break;
 			}
 			break;
 		case "SELECT":
-			StringBuilder result = new StringBuilder();
-			List<Element> listElement_RECORD = ele.getParent().element("RESULT").elements();
-			for (Element e : listElement_RECORD) {
-				List<Element> listElement_Column = e.elements();
-				for (Element eColumn : listElement_Column) {
-					result.append(eColumn.getText());
-					result.append(",,");
+			//确定是否有结果比较
+			StringBuilder result = new StringBuilder("");
+			if(ele.getParent().element("RESULT")!=null) {
+				List<Element> listElement_RECORD = ele.getParent().element("RESULT").elements();
+				for (Element e : listElement_RECORD) {
+					List<Element> listElement_Column = e.elements();
+					for (Element eColumn : listElement_Column) {
+						result.append(eColumn.getText());
+						result.append(",,");
+					}
+					result.append(";;");
 				}
-				result.append(";;");
+			}else {
+				System.out.println("no need compare result");
 			}
 			
 			cell.append(producer.produce("sSelect", level).set("owner_id", (id++) + (1000 * level))
@@ -256,10 +285,9 @@ class decide {
 					.getString());
 			
 			
-			System.out.println(ele.getParent().element("RESULT").element("RECORD").element("COLUMN").getText());
+//			System.out.println(ele.getParent().element("RESULT").element("RECORD").element("COLUMN").getText());
 			break;
 		case "DROP":
-			
 			break;
 		case "ALTER": //修改密码  ALTER userName IDENTIFIED BY username 
 			cell.append(producer.produce("sAlterPwd", level).set("owner_id", (id++) + (1000 * level))
@@ -269,7 +297,7 @@ class decide {
 			break;
 			
 		case "INSERT":
-			String[] b= sValue.split("(?<=\\w|\\))(\\s)(?=\\(|\\w)");
+			b= sValue.split("(?<=\\w|\\))(\\s)(?=\\(|\\w)");
 //			System.out.println(b[i]);
 			String table_name;
 			if(b.length == 5) {
@@ -282,16 +310,33 @@ class decide {
 					.set("attrs_INSERTTARGET",table_name).set("attrs_VALUES", b[b.length-1])
 					.set("attrs_TYPE", TYPE)
 					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
-			
 			break;
 			
 		case "GRANT":
 			
 			break;
+			
+		case "UPDATE":
+			b = sValue.split("((?<=WHERE|SET|UPDATE)(\\s)+)|((\\s)+(?=WHERE|SET))");
+			if(b.length != 6) {
+				System.err.println("SQL cant be recognized :" + sValue);
+				return;
+			}
+			cell.append(producer.produce("sInsert", level).set("owner_id", (id++) + (1000 * level))
+					.set("position_x", x += 80).set("position_y", y += 80)
+					.set("attrs_UPDATETARGET",b[1]).set("attrs_SET_", b[3])
+					.set("attrs_WHERE", b[5])
+					.set("attrs_TYPE", TYPE)
+					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
+			break;
 		default:
 			// 留着以后解决
+			hasAdd = false;
 			System.err.println("SQL cant be recognized :" + sValue);
 			break;
+		}
+		if (hasAdd) {
+			array.add((id - 1) + (1000 * level));
 		}
 	}
 
@@ -440,6 +485,14 @@ class Producer implements StaticString {
 		case "sFor":
 			stringBuilder = new StringBuilder(sFor);
 			break;
+		case "sSetVal":
+			stringBuilder = new StringBuilder(sSetVal);
+			break;
+		case "sGetVal":
+			stringBuilder = new StringBuilder(sGetVal);
+			break;
+		default:
+			return this;
 		}
 		if (id == 1) {
 			set("imageSize", Visable);

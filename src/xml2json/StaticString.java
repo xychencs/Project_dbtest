@@ -103,7 +103,7 @@ public interface StaticString {
 			"	}\r\n" + 
 			"}";
 	
-	public final static String sUserLogin ="	{\r\n" + 
+	public final static String sUserLogin ="{\r\n" + 
 			"	\"type\": \"basic.UserLogin\",\r\n" + 
 			"	\"position\": {\r\n" + 
 			"		\"x\": position_x,\r\n" + 
@@ -339,8 +339,6 @@ public interface StaticString {
 	public final static String sSetTrans ="";
 	public final static String sGrant ="";
 	
-	
-	
 	public final static String sAlterPwd ="{\r\n" + 
 			"		\"type\": \"basic.AlterPwd\",\r\n" + 
 			"		\"position\": {\r\n" + 
@@ -380,8 +378,12 @@ public interface StaticString {
 			"		\"angle\": 0,\r\n" + 
 			"		\"id\": \"owner_id\",\r\n" + 
 			"		\"closed\": closed_id,\r\n" + 
+			"		\"parent\":\"parent_id\",\r\n" + 
 			"		\"z\": 1,\r\n" + 
 			"		\"attrs\": {\r\n" + 
+			"			\"image\": {\r\n" + 
+			"				imageSize\r\n" + 
+			"			},\r\n" + 
 			"			\"VALNAME\": {\r\n" + 
 			"				\"text\": \"attrs_VALNAME\"\r\n" + 
 			"			},\r\n" + 
@@ -403,8 +405,12 @@ public interface StaticString {
 			"		\"angle\": 0,\r\n" + 
 			"		\"id\": \"owner_id\",\r\n" + 
 			"		\"closed\": closed_id,\r\n" + 
+			"		\"parent\":\"parent_id\",\r\n" + 
 			"		\"z\": 2,\r\n" + 
 			"		\"attrs\": {\r\n" + 
+			"			\"image\": {\r\n" + 
+			"				imageSize\r\n" + 
+			"			},\r\n" + 
 			"			\"VALNAME\": {\r\n" + 
 			"				\"text\": \"attrs_VALNAME\"\r\n" + 
 			"			},\r\n" + 
@@ -413,7 +419,7 @@ public interface StaticString {
 			"			}\r\n" + 
 			"		}\r\n" + 
 			"	}";
-	public final static String sPrint ="";
+//	public final static String sPrint ="";
 	public final static String sFor ="{\r\n" + 
 			"	\"type\": \"basic.For\",\r\n" + 
 			"	\"position\": {\r\n" + 
@@ -448,12 +454,11 @@ public interface StaticString {
 	public final static String sConditionalBranch ="";
 	public final static String sLock ="";
 	public final static String sMultipleThread ="";
-	public final static String sSleep ="";
+//	public final static String sSleep ="";
 	public final static String sRemoteCMD ="";
 	public final static String sRunRemote ="";
 	public final static String sInteract ="";
 	public final static String sRunImport ="";
-	public final static String sGeneral ="";
 	
 }
 
