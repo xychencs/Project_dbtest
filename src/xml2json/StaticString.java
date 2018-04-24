@@ -19,7 +19,6 @@ public interface StaticString {
 			"		},\r\n" + 
 			"		\"id\": \"owner_id\",\r\n" + 
 			"		\"z\": 4,\r\n" + 
-			"		\"parent\": \"\",\r\n" + 
 			"		\"closed\": 1,\r\n" + 
 			"		\"attrs\": {\r\n" + 
 			"			\".marker-target\": {\r\n" + 
@@ -352,6 +351,7 @@ public interface StaticString {
 			"		\"angle\": 0,\r\n" + 
 			"		\"id\": \"owner_id\",\r\n" + 
 			"		\"closed\": closed_id,\r\n" + 
+			"		\"parent\":\"parent_id\",\r\n" + 
 			"		\"z\": 1,\r\n" + 
 			"		\"attrs\": {\r\n" + 
 			"			\"USER\": {\r\n" + 

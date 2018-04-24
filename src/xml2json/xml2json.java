@@ -1,16 +1,15 @@
 package xml2json;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.dom.DOMNodeHelper.EmptyNodeList;
 import org.dom4j.io.SAXReader;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class xml2json {
@@ -20,14 +19,39 @@ public class xml2json {
 	public StringBuilder change(StringBuilder s, String prev, String text) {
 		return s;
 	}
-
-	public xml2json(String path,boolean clear) {
+	
+	public xml2json( String path, boolean clear) {
 		this.path = path;
 		decider = new decide(clear);
+	}
+	
+	public xml2json(String s, String path, boolean clear) {
+		this.path = path;
+		decider = new decide(clear);
+		outXml(s, path);
 	}
 
 	public String getJson() throws Exception {
 		return decider.getString(path);
+	}
+
+	public void outXml(String s, String path) {
+		File file = new File(path);
+		FileOutputStream fop;
+		try {
+			fop = new FileOutputStream(file);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			byte[] content = s.getBytes();
+			fop.write(content);
+			fop.flush();
+			fop.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return;
 	}
 }
 
@@ -45,9 +69,10 @@ class decide {
 	public boolean isFirstConnect = true;
 	public ArrayList<Integer> array;
 	public String ForTimes;
-	public boolean Clear ;
+	// 清楚属性值为空的值
+	public boolean Clear;
 	public Element ele;
-	
+
 	public decide(boolean clear) {
 		Clear = clear;
 		x = 0;
@@ -80,21 +105,21 @@ class decide {
 		cell.deleteCharAt(cell.lastIndexOf(","));
 		cell.insert(0, head);
 		cell.append(trail);
-		
-		if(Clear) {
-			JSONObject js;
-			JSONObject json = new JSONObject(cell.toString());
-			JSONArray arr = json.getJSONArray("cells");
-			for (int i = 0; i < arr.length(); i++) {
-				js = (JSONObject) arr.get(i);
-				if (js.has("parent") && js.get("parent").equals("")) {
-					js.put("parent", (Object) null);
-				}
-			}
-			String sss = String.valueOf(json);
-			return sss;
-		}
-		
+//		System.out.println(cell);
+//		if (Clear) {
+//			JSONObject js;
+//			JSONObject json = new JSONObject(cell.toString());
+//			JSONArray arr = json.getJSONArray("cells");
+//			for (int i = 0; i < arr.length(); i++) {
+//				js = (JSONObject) arr.get(i);
+//				if (js.has("parent") && js.get("parent").equals("")) {
+//					js.put("parent", (Object) null);
+//				}
+//			}
+//			String sss = String.valueOf(json);
+//			return sss;
+//		}
+
 		return cell.toString();
 	}
 
@@ -132,7 +157,7 @@ class decide {
 					continue;
 				}
 				if (name.equals("SETVAL") || name.equals("GETVAL")) {
-					SearchNode(e, level+1);
+					SearchNode(e, level + 1);
 					continue;
 				}
 				if (e.getParent().getName().toUpperCase().equals("SQL_CASE")) {
@@ -193,7 +218,6 @@ class decide {
 					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 			hasAdd = true;
 			break;
-			
 		case "GETVAL":
 			cell.append(producer.produce("sGetVal", level).set("owner_id", (id++) + (1000 * (level)))
 					.set("position_x", x += 80).set("position_y", y += 80)
@@ -204,7 +228,7 @@ class decide {
 			break;
 		default:
 			// 临时变量空间，考虑添加临时变量的位置
-			// System.out.println("i dont konw this label "+sName);
+			System.out.println("i dont konw this label "+sName);
 		}
 		// 由于有些标签里并没有添加图符，所以用一个boolean属性记录
 		// 如果添加了，那么在存在图符id数组里添加这个Id值的记录
@@ -231,9 +255,7 @@ class decide {
 			switch (temp[1].toUpperCase()) {
 			case "TABLE":
 				sValue = sValue.replaceFirst("\\(", " (");
-				System.out.println(sValue);
 				sValue = sValue.replaceAll("\\s{2,}", " ");
-				System.out.println(sValue);
 				b = sValue.split("(?<!\\(.{0,100})\\s");
 				cell.append(producer.produce("sCreateTable", level).set("owner_id", (id++) + (1000 * level))
 						.set("position_x", x += 80).set("position_y", y += 80).set("attrs_TABLENAME", temp[2])
@@ -260,9 +282,9 @@ class decide {
 			}
 			break;
 		case "SELECT":
-			//确定是否有结果比较
+			// 确定是否有结果比较
 			StringBuilder result = new StringBuilder("");
-			if(ele.getParent().element("RESULT")!=null) {
+			if (ele.getParent().element("RESULT") != null) {
 				List<Element> listElement_RECORD = ele.getParent().element("RESULT").elements();
 				for (Element e : listElement_RECORD) {
 					List<Element> listElement_Column = e.elements();
@@ -272,61 +294,51 @@ class decide {
 					}
 					result.append(";;");
 				}
-			}else {
+			} else {
 				System.out.println("no need compare result");
 			}
-			
+
 			cell.append(producer.produce("sSelect", level).set("owner_id", (id++) + (1000 * level))
-					.set("position_x", x += 80).set("position_y", y += 80)
-					.set("attrs_COLUMN", result)
-					.set("attrs_SQL",sValue)
-					.set("attrs_TYPE", TYPE)
-					.set("parent_id", "parent_id" + (1000 * level + (id - 1)))
-					.getString());
-			
-			
-//			System.out.println(ele.getParent().element("RESULT").element("RECORD").element("COLUMN").getText());
+					.set("position_x", x += 80).set("position_y", y += 80).set("attrs_COLUMN", result)
+					.set("attrs_SQL", sValue).set("attrs_TYPE", TYPE)
+					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
+
+			// System.out.println(ele.getParent().element("RESULT").element("RECORD").element("COLUMN").getText());
 			break;
 		case "DROP":
 			break;
-		case "ALTER": //修改密码  ALTER userName IDENTIFIED BY username 
+		case "ALTER": // 修改密码 ALTER userName IDENTIFIED BY username
 			cell.append(producer.produce("sAlterPwd", level).set("owner_id", (id++) + (1000 * level))
 					.set("position_x", x += 80).set("position_y", y += 80).set("attrs_USER", temp[1])
 					.set("attrs_PWD", temp[4]).set("attrs_TYPE", TYPE)
 					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 			break;
-			
 		case "INSERT":
-			b= sValue.split("(?<=\\w|\\))(\\s)(?=\\(|\\w)");
-//			System.out.println(b[i]);
+			b = sValue.split("(?<=\\w|\\))(\\s)(?=\\(|\\w)");
+			// System.out.println(b[i]);
 			String table_name;
-			if(b.length == 5) {
+			if (b.length == 5) {
 				table_name = b[2];
-			}else {
+			} else {
 				table_name = b[2] + b[3];
 			}
 			cell.append(producer.produce("sInsert", level).set("owner_id", (id++) + (1000 * level))
-					.set("position_x", x += 80).set("position_y", y += 80)
-					.set("attrs_INSERTTARGET",table_name).set("attrs_VALUES", b[b.length-1])
-					.set("attrs_TYPE", TYPE)
+					.set("position_x", x += 80).set("position_y", y += 80).set("attrs_INSERTTARGET", table_name)
+					.set("attrs_VALUES", b[b.length - 1]).set("attrs_TYPE", TYPE)
 					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 			break;
-			
 		case "GRANT":
-			
+
 			break;
-			
 		case "UPDATE":
 			b = sValue.split("((?<=WHERE|SET|UPDATE)(\\s)+)|((\\s)+(?=WHERE|SET))");
-			if(b.length != 6) {
+			if (b.length != 6) {
 				System.err.println("SQL cant be recognized :" + sValue);
 				return;
 			}
 			cell.append(producer.produce("sInsert", level).set("owner_id", (id++) + (1000 * level))
-					.set("position_x", x += 80).set("position_y", y += 80)
-					.set("attrs_UPDATETARGET",b[1]).set("attrs_SET_", b[3])
-					.set("attrs_WHERE", b[5])
-					.set("attrs_TYPE", TYPE)
+					.set("position_x", x += 80).set("position_y", y += 80).set("attrs_UPDATETARGET", b[1])
+					.set("attrs_SET_", b[3]).set("attrs_WHERE", b[5]).set("attrs_TYPE", TYPE)
 					.set("parent_id", "parent_id" + (1000 * level + (id - 1))).getString());
 			break;
 		default:
@@ -343,6 +355,9 @@ class decide {
 	// 通过这个方法对字符串中的一些值进行修改
 	public void changeValue(String prev, String rep) {
 		int index = cell.indexOf(prev);
+		if(index < 0) {
+			return;
+		}
 		cell.replace(index, index + prev.length(), rep);
 	}
 
@@ -374,10 +389,8 @@ class decide {
 						.getString());
 			}
 			// 进入嵌套
-			if ((array.get(id)) / 1000 < (array.get(id + 1) / 1000)) { 
-
+			if ((array.get(id)) / 1000 < (array.get(id + 1) / 1000)) {
 				changeValue("parent_id" + String.valueOf(array.get(id)), embeds);
-
 				ssss.add(embeds);
 				embeds = String.valueOf(array.get(id));
 				sons += String.valueOf(array.get(id)) + " ";
@@ -386,7 +399,7 @@ class decide {
 				embeds = String.valueOf(array.get(id));
 			}
 			// 退出嵌套
-			if ((array.get(id)) / 1000 > (array.get(id + 1) / 1000)) { 
+			if ((array.get(id)) / 1000 > (array.get(id + 1) / 1000)) {
 				sons += String.valueOf(array.get(id)) + " ";
 
 				changeValue("parent_id" + String.valueOf(array.get(id)), embeds);
@@ -426,10 +439,6 @@ class decide {
 		return embeds_sons.toString();
 	}
 
-	
-	
-	
-	
 }
 
 class Producer implements StaticString {
@@ -485,6 +494,10 @@ class Producer implements StaticString {
 		case "sFor":
 			stringBuilder = new StringBuilder(sFor);
 			break;
+		case "sAlterPwd":
+			stringBuilder = new StringBuilder(sAlterPwd);
+			break;
+			
 		case "sSetVal":
 			stringBuilder = new StringBuilder(sSetVal);
 			break;
@@ -521,10 +534,15 @@ class Producer implements StaticString {
 	public Producer set(String prev, StringBuilder rep) {
 		return set(prev, String.valueOf(rep));
 	}
-	
+
 	public Producer set(String prev, String rep) {
 		int a = stringBuilder.indexOf(prev);
-		if (a < 0) {
+		if(rep.matches("parent_id1\\d*")) {//"parent":"parent_id",
+			a = stringBuilder.indexOf("\"parent\":\"parent_id\",");
+			stringBuilder.delete(a, a+21);
+			return this;
+		}
+		if (a < 0 ) {
 			return this;
 		}
 		stringBuilder.replace(a, a + prev.length(), rep);

@@ -765,6 +765,9 @@ public class jsonToXml {
 		JSONArray jsonArray = json.getJSONArray("cells");
 		String id = null;
 		boolean Find = false;
+		if (jsonArray.length() == 0) {
+			return id;
+		}
 		while (!Find) {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
